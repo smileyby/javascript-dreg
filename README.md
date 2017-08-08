@@ -43,3 +43,112 @@ JavaScript的语法来源于C。在所有其他类似C语言风格的语言里�
 
 在大多数语言中，一般说声明变量的最好的地方是在第一次用到它的地方。但这种做法在JavaScript里反而是一个坏习惯，因为它没有块级作用域。更好的方式是在每个函数的凯有部分声明所有变量。
 
+### 3.自动插入分号
+
+JavaScript有一个机制，它试图通过自动插入分号来修正缺损的程序。千万不要依靠它，它可能会掩盖更为严重的错误。
+
+有时它会不合时宜地插入分号。请考虑在return语句中自动插入分号导致的后果。如果一个return语句返回一个值，这个值表达式的开始部分必须和return在同一行上：
+
+```js
+
+return 
+{
+	status: true
+};
+
+```
+
+这看起来是要返回一个包含status成员元素的对象。不行的是，自动插入分号让它变成了返回undefined。自动插入分号导致程序被误解却没有任何井盖提醒。如果把{放在上一行的尾部而不是下一行的开头就可以避免该问题：
+
+```js
+
+return {
+	status: true
+};
+
+```
+
+## 保留字
+
+下面的单词在JavaScript里被保留：
+
+```
+
+abstract boolean break byte case catch char class const continue debugger default delete do double else enum export extends false final finally float for function goto if implements import in instanceof int interface long native new null package private protected public return short static super switch synchronized this throw throws transient true try typeof var volatile void while with
+
+```
+
+这些单词中的大多数并没有在语言中使用
+
+他们不能被用来命名变量或参数。当保留字被用作对象字面量的键值时，他们必须被引号括起来。他们不能被用在点表示法中，所以有时必须使用括号表示法：
+
+```js
+
+var method;                 // ok
+var class;                  // 非法
+object = {box: value};      // ok
+object = {case: value};     // 非法
+object = {'case': value};   // ok
+object.box = value;         // ok
+object.case = value;        // 非法
+object['case'] = value;     // ok
+
+```
+
+## Unicode
+
+当涉及JavaScript的时候，Unicode预设计最多65536个字符。而从那以后它的容量慢慢增长到了拥有1百万个字符。
+
+JavaScript的字符时16位的。那足够覆盖原有的65536个字符（现在被称为基本多文种平面）。剩下的百万字符中的每一个都可以用一对字符来表示。Unicode把一对字符视为一个单一的字符。而JavaScript认为一对字符是两个不同的字符。
+
+## typeof
+
+typeof运算符返回一个用于识别运算数类型的字符串。所以：
+
+typeof 98.6
+
+返回 'number'。不行的是：
+
+typeof null
+
+返回'object'而不是'null'。真糟糕。更好的检测null的方式其实很简单：
+
+my_value === null
+
+一个更大的问题是检测对象的值。typeof不能辨别出null对象，但你可以像下面这样做，因为null值为假，而所有对象值为真：
+
+```js
+
+if(my_value && typeof my_value === 'object'){
+	// my_value 是一个对象或数组
+}
+
+```
+
+在对正则表达式的类型识别上，各种JavaScript的实现不太一致。对于下面代码：
+
+```js
+
+typeof /a/
+
+```
+
+一些实现会报告'object'，而其他的说它是'function'。如果报告'regxp'可能会更有用些，但标准不允许那么做。
+
+## parseInt
+
+parseInt是一个将字符串转换为整数的函数。它在遇到非数字时停止解析，所以parseInt('16')与parseInt('16 tons')产生相同的结果。如果该函数会提醒我们出现额外文本就好，但它不会那么做。
+
+如果该字符串第一个字符时0，那么该字符串将被基于八进制而不是十进制来求值。在八进制中，8和9不是数字，所以parseInt('08')和parseInt('09')产生0作为结果。这个错误导致程序解析日期和时间时出现问题。幸运的是parseInt可以接受一个技术作为参数，如此一来parseInt('08', 10)结果为8.我建议你总是提供这个基数参数。
+
+## +
+
+`+` 运算符可以用于加法运算或字符串链接。它究竟如何执行取决于其参数的类型。如果其中的一个运算符是空字符串，它会把另一个运算数转换成字符串并返回。如果两个元素安抚都是数字，他返回两者之和。否则，它把两个运算数都转换成为字符串并连接起来。这个复杂的行为bug的常见来源。如果你打算用 + 去做加法运算，请确保两个运算数都是整数。
+
+## 浮点数
+
+
+
+
+
+
