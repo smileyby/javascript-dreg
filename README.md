@@ -230,7 +230,111 @@ arguments数组不是一个数组，它是一个带有length成员元素的对�
 
 ## 假值
 
+JavaScript拥有令人惊讶的一大组假值，请参见表A-1
 
+表A-1：JavaScript的众多假值
+
+<table>
+	<tr>
+		<td>值</td>
+		<td>类型</td>
+	</tr>
+	<tr>
+		<td>0</td>
+		<td>Number</td>
+	</tr>
+	<tr>
+		<td>NaN（非数字）</td>
+		<td>Number</td>
+	</tr>
+	<tr>
+		<td>''（空字符串）</td>
+		<td>String</td>
+	</tr>
+	<tr>
+		<td>false</td>
+		<td>Boolean</td>
+	</tr>
+	<tr>
+		<td>null</td>
+		<td>Object</td>
+	</tr>
+	<tr>
+		<td>undefined</td>
+		<td>Undefined</td>
+	</tr>
+</table>
+
+这些值全部等同于假，但它们是不可互换的。例如，这是用一种错误的方式去确定一个对象是否缺少一个成员元素：
+
+```js
+
+value = myObject[name];
+if (value == null) {
+	alert(name + ' not found.');
+}
+
+```
+
+undefined是缺失的成员元素的值，该代码片段用null来测试。它使用了会强制类型转换的==运算符，而不是更可靠的===运算符。有时候两个错误会抵消，有时则不会。
+
+undefined 和 NaN并不是常量。他们是全局变量，而且你可以改变他们的值。那本是不应该的，但事实却是如此。千万不要这样做。
+
+## hasOwnProperty
+
+hasOwnProperty方法被用作一个过滤器去避开for in语句的一个问题。不行的是，hasOwnProperty是一个方法，而不是一个运算符。所以在任何对象中，它可能会被一个不同的函数甚至一个非函数的值所替换。
+
+```js
+
+var name;
+another_stooge.hasOwnProperty = null;     // 地雷
+for (name in another_stooge) {
+	if (another_stooge.hasOwnProperty(name)){  // 触雷
+		document.writeIn(name + ': ' + another_stooge[name]);
+	}
+	
+}
+
+```
+
+## 对象
+
+JavaScript的对象永远不会有真的空对象，因为他们看可以从原型链中取得成员元素。有时候那些带来些麻烦。例如，假设你正在编写一个程序去计算一段文本中每个单词的出现次数。我们可以使用toLowerCase方法统一转换文本为小写格式，并接着用split方法以一个正则表达式为参数去产生出一个单词数组，然后可以遍历该数组单词并计算我们看到的每个单词的次数：
+
+```js
+
+var i;
+var word;
+var text = 
+			"This oracle of comfort has so pleased me, " +
+			"That when I am in heaven I shall desire " +
+			"To see what this child does, " +
+			"and praise my Constructor.";
+
+var words = text.toLowerCase( ).split(/[\s,.]+/);
+var count = {};
+for(i = 0; i < words.length; i += 1){
+	word = words[i];
+	if(count[word]){
+		count[word] += 1;
+	} else {
+		count[word] = 1;
+	}
+}
+
+```
+
+让我们来研究该结果，count['this']的值为2，count.heaven的值是1，但是count.constructor却包含着一个看上去令人不可思议的字符串。其原因在于count对象集成自Object.prototype，而Object.prototype包含着一个名为constructor的成员对象，它的值是一个Object。 += 运算符，就像+运算符一样，当它的运算数不是数字时执行字符串连接的操作而不是做加法。因为该对象是一个函数，所以+=运算符将其传换成一个莫名其妙的字符串，然后再把一个数字1加载它的后面。
+
+我们可以采用处理for in中的问题的相同方法去避免类似问题：用hasOwnProperty方法检测成员关系，或者查找特定的类型。在当前情形下，我们对似是而非的count[word]的测试条件不够具体。我们就可以这样去写：
+
+```js
+
+if (typeof count[word] === 'number') {
+
+}
+
+```
 
 
 
