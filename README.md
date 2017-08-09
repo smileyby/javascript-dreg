@@ -147,6 +147,89 @@ parseInt是一个将字符串转换为整数的函数。它在遇到非数字时
 
 ## 浮点数
 
+二进制的浮点数不能正确地处理十进制的小数，因此0.1 + 0.2 不等于 0.3.这是JavaScript中经常被报告的bug，并且它是遵循二进制浮点数算数运算标准而有意导致的结果。这个标准对很多应用都适合的，但它违背了大多数你在中学所学过的关于数字的知识。幸运的是，浮点数中的整数运算是精确的，所以小数表现出来的错误可以通过精度来避免。
+
+举例来说，美元可以通过乘以100而全部转成美分，然后就可以准确地将美分相加。他们的和可以除以100来转换回美元。当人们计算货币时当然会期望得到精确的结果。
+
+## NaN
+
+NaN IEEE 754中定义的一个特殊的数量值。它表示不是一个数字，尽管下面的表达式返回的是true：
+
+```js
+
+typeof NaN === 'number'  // true
+
+```
+
+该值可能会试图将非数字形式的字符串转换为数字时产生。例如：
+
+```js
+
++ '0'    // 0
++ 'oops' // NaN
+
+```
+
+如果NaN是数学运算中的一个运算数，那么结果就会是NaN。所以，如果你有一个公式链产生NaN的结果，那么至少其中一个输入项是NaN，或者在某个地方产生了NaN。
+
+你可以对NaN进行检测。正如我们之前所见，typeof不能辨别数字和NaN，并且试试证明NaN不等同于它自己。所以，下面的代码结果令人惊讶：
+
+```js
+
+NaN === NaN   // false
+NaN !== NaN   // true
+
+```
+
+JavaScript提供了一个isNaN函数来辨别数字与NaN：
+
+```js
+
+isNaN(NaN)     // true
+isNaN(0)       // false
+isNaN('oops')  // true
+isNaN('0')     // false 
+
+```
+
+判断一个值是否可用做数字的最佳方法是使用isFinite函数，因为它会筛选除掉NaN和Infinity。不幸的是，isFinite会试图把他们的运算数转换成一个数字，所以，如果值事实上不是一个数字，它就不是一个好的测试。你可能希望定义自己的isNumber函数：
+
+```js
+
+function isNumber(value) {
+	return typeof value === 'number' && isFinite(value);
+}
+
+```
+
+## 伪数组
+
+JavaScript没有真正的数组。这也不全是坏事。JavaScript的数组确实很容易使用。不必给它们设置维度，而且他们永远不会产生越界错误。但它们的性能相比真正的数组可能相当糟糕。
+
+typeof运算符不能辨别数组和对象。要判断一个值是否为数组，你还需要检查它的constructor属性：
+
+```js
+
+if (my_value && typeof my_value === 'object' && my_value.constructor === Array) {
+	// my_value 是一个数组
+}
+
+```
+
+上面的检测对于在不同帧或窗口创建的数组将会给出false。当数组有可能在其他的帧中被创建，下面的检测更为可靠：
+
+```js
+
+if (my_value && typeof my_value === 'object' && typeof my_value.length === 'number' && !(my_value.propertyIsEnumerable('length'))) {
+	// my_value 确实是一个数组
+}
+
+```
+
+arguments数组不是一个数组，它是一个带有length成员元素的对象。上面的检测会将arguments数组识别为一个数组，有时候这是你希望得到的结果，尽管arguments不包括任何数组的方法。无论如何，如果propertyIsEnumerable方法被覆盖，该检测仍然可能会失败。
+
+## 假值
+
 
 
 
